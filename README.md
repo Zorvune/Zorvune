@@ -1,429 +1,524 @@
 # Zorvune
 
-### The accountability layer between physical assets and digital records.
+### Know where it is. Know who has it. Know what happened.
 
-**Zorvune** is a physical asset accountability platform designed to solve a simple but overlooked problem:
+Zorvune is a physical asset accountability platform that helps organizations keep track of the things they own and, more importantly, keep track of what happens to them.
 
-> **A database can say where an asset is. That doesn't mean the asset is actually there.**
+Computers get moved between departments. Equipment gets borrowed. Devices get assigned to different people. Tools get taken to another location and sometimes never make it back.
 
-Organizations manage computers, equipment, tools, devices, furniture, laboratory assets, and other physical property through digital records. But physical assets constantly move through offices, departments, employees, projects, and locations.
+The problem isn't simply that organizations have a lot of assets.
 
-Records don't always move with them.
+The problem is that **the record and reality can slowly become different.**
 
-An asset can be transferred without being recorded, borrowed by another department, misplaced, damaged, or left at a different location while the system continues showing its previous state.
-
-Zorvune focuses on closing that gap.
+Zorvune is built to keep those two connected.
 
 ---
 
 ## The Problem
 
-Traditional asset management systems are built around records:
+Imagine an organization has this record:
 
 ```text
-Asset → Location
-Asset → Owner
-Asset → Status
+Laptop #1042
+Department: Engineering
+Location: Room 204
+Assigned to: Abel
 ```
 
-But physical reality is not static.
+A few weeks later, Abel gives the laptop to another employee for a project.
+
+Nobody updates the system.
+
+The database still says:
 
 ```text
-Digital record:
-Laptop-042 → IT → Room 204 → Employee A
-
-Physical reality:
-Laptop-042 → Finance → Room 118
-                 ↑
-            never recorded
+Engineering → Room 204 → Abel
 ```
 
-The result is an organization that may have a complete-looking inventory while lacking a reliable understanding of what is actually happening to its assets.
+But the laptop is actually:
 
-This creates questions that ordinary inventory systems struggle to answer:
+```text
+Finance → Room 112 → Someone else
+```
 
-* Where was the asset actually verified?
-* When was it last physically confirmed?
-* Who was responsible for it at the time?
-* Has it changed location since the last verification?
-* What happened between two recorded events?
-* Is the record wrong, or did reality change?
-* Can the asset's history be trusted?
+Nothing is technically wrong with the database.
 
-**Zorvune is built around these questions.**
+It simply no longer represents reality.
+
+Now imagine this happening to hundreds or thousands of assets.
+
+When something goes missing, an organization may have to ask:
+
+* Who had it?
+* Where was it last seen?
+* When did it move?
+* Who transferred it?
+* Was the transfer recorded?
+* When was the location last verified?
+* Is the asset actually missing, or is the record outdated?
+
+Zorvune exists to make those questions answerable.
 
 ---
 
-# Why Zorvune?
+# What Zorvune Does
 
-Research reviewed during the development of Zorvune identified several weaknesses in current approaches to physical asset management.
+Zorvune gives every physical asset a **living record**.
 
-Research on RFID verification demonstrates that systems can efficiently identify missing or unreadable tags, but detecting a discrepancy does not necessarily explain why it occurred.
+Instead of storing only its current information, Zorvune keeps the important events that happen throughout its life.
 
-Research on enterprise asset ownership has shown that ownership information can be incomplete enough that machine-learning methods are used to reconstruct which team owns an asset.
-
-Research on physical tracking also demonstrates that location measurements have different levels of accuracy depending on the technology and environment.
-
-Meanwhile, asset maintenance and replacement research relies on historical per-asset information to make lifecycle decisions.
-
-Together, these findings point to a larger problem:
-
-> **Organizations can maintain digital records of their physical assets without maintaining a reliable connection between those records and physical reality.**
-
-Zorvune is designed around that connection.
-
----
-
-# Core Idea
-
-Zorvune treats an asset as more than a row in a database.
-
-Each asset has a history.
+For example:
 
 ```text
-                    ┌── Location
-                    │
-                    ├── Custodian
-                    │
-Asset ──────────────┼── Verification
-                    │
-                    ├── Maintenance
-                    │
-                    ├── Transfers
-                    │
-                    └── Discrepancies
-```
+Laptop #1042
 
-Instead of only asking:
-
-> "Where does the database say this asset is?"
-
-Zorvune is built to ask:
-
-> **"What evidence do we have about this asset's current state?"**
-
----
-
-# The Zorvune Model
-
-## 1. Asset Identity
-
-Every physical asset has a persistent digital identity connecting the real-world object to its record.
-
-The identity becomes the anchor for everything that happens to the asset throughout its lifecycle.
-
----
-
-## 2. Custody
-
-An asset's current custodian is only part of the story.
-
-Zorvune treats responsibility as a history:
-
-```text
-Employee A
-    ↓
-IT Department
-    ↓
-Employee B
-    ↓
-Engineering
-```
-
-This makes it possible to understand how responsibility changed instead of relying on a single current-owner field.
-
----
-
-## 3. Location
-
-A location should not be treated as an eternal fact.
-
-A useful location record has context:
-
-```text
-Location
-Timestamp
-Verification source
-Verification status
-Confidence / uncertainty
-```
-
-This creates an important distinction between:
-
-**"The system says it is here."**
-
-and
-
-**"It was physically verified here recently."**
-
----
-
-## 4. Verification
-
-Physical verification is where the digital record meets reality.
-
-A verification event can establish whether an expected asset was physically observed.
-
-But a failed verification does not automatically mean:
-
-```text
-ASSET = LOST
-```
-
-It means:
-
-```text
-EXPECTED
+Purchased
    ↓
-NOT VERIFIED
+Registered
    ↓
-DISCREPANCY
+Assigned to Abel
    ↓
-INVESTIGATION
-```
-
-The distinction matters.
-
-A missing asset, an outdated record, a damaged identifier, and an asset temporarily moved elsewhere are different situations.
-
----
-
-## 5. Discrepancies
-
-Zorvune treats discrepancies as first-class events rather than simply changing a database field.
-
-An asset can move through states such as:
-
-```text
+Moved to Room 204
+   ↓
+Transferred to Sara
+   ↓
+Moved to Finance
+   ↓
 Verified
-   ↓
+```
+
+The current location is useful.
+
+The history explains **how it got there**.
+
+---
+
+# The Core Idea
+
+Zorvune revolves around four simple questions:
+
+### 1. What is it?
+
+Every asset has an identity.
+
+```text
+Asset ID
+Name
+Serial number
+Category
+Condition
+```
+
+### 2. Where is it?
+
+The system keeps track of the asset's expected location and its verification history.
+
+```text
+Expected location: Engineering / Room 204
+Last verified: September 24
+```
+
+### 3. Who is responsible for it?
+
+Instead of only storing a name in an "owner" field, Zorvune keeps track of responsibility over time.
+
+```text
+Abel
+  ↓
+Sara
+  ↓
+Engineering Department
+```
+
+### 4. What happened?
+
+Every important change becomes part of the asset's timeline.
+
+```text
+Assigned
+Transferred
+Moved
+Verified
+Maintained
+Reported missing
+Recovered
+Retired
+```
+
+This creates a simple but powerful idea:
+
+> **An asset is not just a record. It has a story.**
+
+---
+
+# When Reality Doesn't Match the Record
+
+This is where Zorvune becomes different from a normal inventory system.
+
+Suppose the system expects:
+
+```text
+Laptop #1042
+Expected: Room 204
+```
+
+During a verification, the laptop isn't there.
+
+Zorvune shouldn't immediately say:
+
+> ❌ Lost
+
+Because nobody knows that yet.
+
+Instead:
+
+```text
 Expected
    ↓
-Not Found
+Not found
    ↓
-Under Investigation
+Discrepancy
+   ↓
+Investigation
    ↓
 Resolved
 ```
 
-The important part is preserving **what happened**, rather than silently overwriting the previous state.
+The discrepancy can then be investigated.
+
+Maybe:
+
+```text
+→ The laptop was transferred
+→ Someone borrowed it
+→ It was moved to another room
+→ The location record was never updated
+→ The asset is actually missing
+```
+
+Once the situation is understood, the record can be updated while preserving what happened.
 
 ---
 
-## 6. Asset History
+# The Asset Timeline
 
-A physical asset accumulates a history throughout its lifecycle.
+Every asset has a timeline that tells its story.
+
+Example:
 
 ```text
-Procured
-   ↓
-Registered
-   ↓
-Assigned
-   ↓
-Transferred
-   ↓
-Verified
-   ↓
-Maintained
-   ↓
-Transferred
-   ↓
-Verified
-   ↓
-Retired
+September 02
+Asset registered
+        ↓
+September 05
+Assigned to Abel
+        ↓
+September 12
+Moved to Room 204
+        ↓
+September 18
+Transferred to Sara
+        ↓
+September 24
+Expected in Room 204
+        ↓
+September 24
+Not found
+        ↓
+September 25
+Discrepancy investigated
+        ↓
+September 25
+Found in Finance
 ```
 
-This history provides the context needed to understand the asset's current state.
+Instead of looking at a database row and trying to figure out what happened, the organization can follow the timeline.
 
 ---
 
-# Example
+# Why This Matters
 
-Consider an organization with 500 computers.
+Without a clear history, an organization might know:
 
-The system contains:
+> "This laptop is missing."
 
-```text
-Laptop #237
-Department: Engineering
-Room: 204
-Custodian: Employee A
-```
+With a clear history, it can know:
 
-During the next physical verification, Laptop #237 cannot be found.
+> "This laptop was last verified in Engineering, was transferred to Sara three days later, and was expected in Room 204 when it wasn't found."
 
-A conventional inventory system may simply produce:
-
-```text
-❌ Missing
-```
-
-But that creates more questions than answers.
-
-Zorvune treats the situation as a discrepancy:
-
-```text
-Laptop #237
-       │
-       ├── Last verified: Room 204
-       ├── Last custodian: Employee A
-       ├── Expected location: Engineering
-       │
-       ↓
-Physical verification
-       │
-       ↓
-Not observed
-       │
-       ↓
-Discrepancy created
-       │
-       ↓
-Investigation
-       │
-       ├── Transferred?
-       ├── Borrowed?
-       ├── Relocated?
-       ├── Identifier damaged?
-       └── Actually missing?
-```
-
-The objective is not simply to count missing assets.
-
-It is to preserve the chain of evidence needed to understand **what happened**.
+That difference matters when dealing with expensive equipment, shared resources, accountability, and large organizations.
 
 ---
 
-# What Makes the Problem Interesting?
+# Zorvune's Main Building Blocks
 
-The difficult part of physical asset management is not storing:
+## Assets
+
+A central place for all physical assets.
+
+Examples:
+
+* Laptops
+* Phones
+* Projectors
+* Cameras
+* Tools
+* Printers
+* Laboratory equipment
+* Office equipment
+* Vehicles
+* Other organizational property
+
+---
+
+## People & Departments
+
+Connect assets to the people and departments responsible for them.
 
 ```text
-name
-serial number
-location
-owner
+Person
+Department
+Role
+Assigned assets
 ```
 
-Those are easy.
+---
 
-The difficult part is maintaining the connection between:
+## Locations
+
+Organize physical locations inside an organization.
 
 ```text
-DIGITAL RECORD
-      ↕
-PHYSICAL REALITY
+Organization
+ ├── Building A
+ │    ├── Floor 1
+ │    └── Floor 2
+ │
+ └── Building B
+      ├── Office 101
+      └── Office 102
 ```
 
-over time.
+---
 
-Physical reality changes continuously.
+## Transfers
 
-Digital records change when someone records those changes.
+Record when an asset moves from one person, department, project, or location to another.
 
-That difference creates the **Zorvune Problem**.
+```text
+FROM
+Engineering / Abel
+
+        ↓
+
+TO
+Finance / Sara
+```
+
+The transfer becomes part of the asset's permanent timeline.
 
 ---
 
-# Research Foundation
+## Verification
 
-Zorvune's problem definition is grounded in research covering:
+Allow an organization to check whether its physical assets match its records.
 
-* Physical asset verification
-* RFID missing-tag identification
-* Barcode and QR recognition
-* Enterprise asset ownership
-* Asset location tracking
-* Maintenance optimization
-* Asset lifecycle management
-* Supply-chain traceability
-* Tamper-evident provenance
-* Traceability adoption
+For example:
 
-Selected research:
+```text
+Expected: 25 assets
+Verified: 23 assets
 
-### Asset verification
+2 discrepancies found
+```
 
-Liu et al., *Revisiting RFID Missing Tag Identification*
-
-https://arxiv.org/abs/2510.18285
-
-Research on missing-tag identification demonstrates that the problem of identifying expected-but-unreadable physical tags can be formally modeled and efficiently solved.
-
-### Enterprise ownership
-
-Jacobik, *Asset Ownership Identification: Using Machine Learning to Predict Enterprise Asset Ownership*
-
-https://arxiv.org/abs/2312.10266
-
-The study demonstrates that enterprise asset ownership can be sufficiently incomplete that ownership has to be inferred from other organizational and network attributes.
-
-### Physical tracking
-
-Hateley et al., *Camera-RFID Fusion for Robust Asset Tracking in Forested Environments*
-
-https://arxiv.org/abs/2604.26241
-
-The research demonstrates that different tracking technologies have different accuracy and failure characteristics, highlighting the importance of understanding the uncertainty behind a location observation.
-
-### Asset lifecycle
-
-Cesca & Novaes, *Physical Assets Replacement: An Analytical Approach*
-
-https://arxiv.org/abs/1210.3678
-
-The work models replacement decisions using accumulated capital and maintenance costs over an asset's lifecycle.
-
-### Maintenance optimization
-
-Verleijsdonk et al., *Maintenance Optimization for Asset Networks with Unknown Degradation Parameters*
-
-https://arxiv.org/abs/2410.18246
-
-The research demonstrates the importance of historical per-asset information for data-driven maintenance decisions.
-
-### Traceability
-
-Blaettchen et al., *Traceability Technology Adoption in Supply Chain Networks*
-
-https://arxiv.org/abs/2104.14818
-
-The study examines how traceability benefits depend on adoption across interconnected participants.
+The important part is that the organization can then investigate those discrepancies instead of simply changing numbers.
 
 ---
 
-# Project Direction
+## Discrepancies
 
-Zorvune is being developed as a platform for organizations that need stronger accountability over physical assets.
+When something doesn't match, Zorvune records it.
 
-The project is focused on one principle:
+A discrepancy can have:
 
-> **Don't just store what the organization believes about an asset. Preserve the evidence of what actually happened to it.**
+```text
+Asset
+Expected state
+Observed state
+Date
+Reported by
+Status
+Investigation notes
+Resolution
+```
 
-The goal is to make asset records more understandable, traceable, and connected to physical verification.
+This turns:
+
+> "Something is wrong."
+
+into:
+
+> "Something is wrong, here's what was expected, what was observed, who reported it, and what happened afterward."
 
 ---
 
-# Project Status
+# A Simple Example
 
-🚧 **Active development**
+A school owns 100 laptops.
 
-Zorvune is currently being developed as part of the **STARK Official Hackathon**.
+The system knows:
 
-The project is evolving through research, prototyping, and validation of the core physical-asset accountability problem.
+```text
+100 registered
+96 currently assigned
+4 in storage
+```
+
+During a verification, one laptop expected in the computer lab isn't found.
+
+Instead of deleting it or changing its location manually:
+
+```text
+Laptop #037
+Status: Discrepancy
+Expected: Computer Lab
+Last verified: Computer Lab
+```
+
+The administrator investigates.
+
+They discover that a teacher took it to another classroom.
+
+The record is updated:
+
+```text
+Laptop #037
+New location: Classroom 12
+Custodian: Teacher X
+```
+
+But the original discrepancy remains in the history.
+
+Now the organization knows both:
+
+**where the laptop is now**
+
+and
+
+**why the previous record was wrong.**
+
+---
+
+# Designed Around Accountability
+
+Zorvune is not trying to make organizations manually enter more information just for the sake of having more data.
+
+The goal is to make important changes understandable.
+
+When something moves, there should be a reason.
+
+When responsibility changes, there should be a record.
+
+When an asset cannot be found, there should be an investigation.
+
+When a discrepancy is resolved, the organization should still be able to see what happened.
+
+---
+
+# From Inventory to Accountability
+
+Traditional inventory thinking:
+
+```text
+What do we have?
+```
+
+Zorvune:
+
+```text
+What do we have?
+        +
+Where is it?
+        +
+Who is responsible?
+        +
+When was it last verified?
+        +
+What changed?
+        +
+What happened when reality didn't match the record?
+```
+
+That is the core of Zorvune.
+
+---
+
+# Project Structure
+
+Zorvune is designed around a simple workflow:
+
+```text
+REGISTER
+   ↓
+ASSIGN
+   ↓
+MOVE
+   ↓
+VERIFY
+   ↓
+MATCH ────────────────┐
+   │                  │
+   │                  │
+   └── MISMATCH       │
+          ↓           │
+     INVESTIGATE      │
+          ↓           │
+       RESOLVE ───────┘
+```
+
+The result is a continuous asset history rather than a collection of disconnected records.
+
+---
+
+# Who Is Zorvune For?
+
+Zorvune can be used by organizations that manage physical property across multiple people or locations, including:
+
+* Schools and universities
+* Companies
+* NGOs
+* Hospitals
+* Laboratories
+* Government organizations
+* Workshops
+* Offices
+* Warehouses
+
+Anywhere physical assets move, accountability can become difficult.
 
 ---
 
 # Vision
 
-Organizations should not need to wait for an annual inventory count to discover that their digital asset records stopped matching reality months ago.
+Zorvune's goal is simple:
 
-Zorvune aims to make the relationship between an organization's **assets, people, locations, events, and evidence** visible throughout the asset lifecycle.
+**Make physical assets accountable.**
 
-### Zorvune
+Not just by telling an organization what it owns, but by keeping track of the relationship between the asset, its location, its custodian, and the events that happen throughout its life.
 
-**Know what you own.
-Know where it is.
-Know who was responsible.
+Because when an organization asks:
+
+> **"What happened to this asset?"**
+
+the answer shouldn't require searching through spreadsheets, messages, paper forms, and people's memories.
+
+It should be in the asset's story.
+
+---
+
+## Zorvune
+
+**Know where it is.
+Know who has it.
 Know what happened.**
